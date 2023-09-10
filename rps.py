@@ -11,6 +11,7 @@ in this game"""
 class Player:
     def __init__(self):
         self.score = 0
+        self.index = 0
         self.last_opponent_move = None
         self.my_move = None
 
@@ -31,6 +32,11 @@ def beats(one, two):
     return winning_combinations[one] == two
 
 
+class RockPlayer(Player):
+    def move(self):
+        return "rock"
+
+
 class RandomPlayer(Player):
     def move(self):
         return random.choice(MOVES)
@@ -49,6 +55,7 @@ class HumanPlayer(Player):
 class ReflectPlayer(Player):
     """This allows opponent to play your previous move as their next move
     (If you play rock in your last move, the opponent would play rock in their next move)"""
+
     def move(self):
         if self.last_opponent_move is not None:
             return self.last_opponent_move
@@ -60,16 +67,18 @@ class CyclePlayer(Player):
     """This allows opponent to remember what move it played last round,
     and cycles through the different moves. (If it played 'rock' this round,
     it should play 'paper' in the next round.)"""
+
     def move(self):
-        if self.last_opponent_move is not None:
-            index = (MOVES.index(self.last_opponent_move) + 1) % len(MOVES)
-            return MOVES[index]
+        new_move = MOVES[self.index]
+        if self.index == 2:
+            self.index = 0
         else:
-            return random.choice(MOVES)
+            self.index += 1
+        return new_move
 
 
 class Game:
-    def __init__(self, p1, p2, rounds=3):
+    def __init__(self, p1, p2, rounds=4):  # Change value of rounds to determine number of game rounds
         self.p1 = p1
         self.p2 = p2
         self.rounds = rounds
@@ -101,10 +110,12 @@ class Game:
             print("THE WINNER IS PLAYER TWO")
         else:
             print("IT'S A TIE!")
+        print(f"Final Score:\nPlayer One: {self.p1.score}, Player Two: {self.p2.score}")
         print("Game over!")
 
 
 if __name__ == '__main__':
-    opponent = ReflectPlayer()  # Switch opponent from ReflectivePlayer() and CyclePlayer() or RandomPlayer
+    opponent = CyclePlayer()  # Switch opponent from ReflectivePlayer() and CyclePlayer() or RandomPlayer() or
+    # RockPlayer()
     game = Game(HumanPlayer(), opponent)
     game.play_game()
