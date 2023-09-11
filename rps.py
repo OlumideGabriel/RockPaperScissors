@@ -19,8 +19,7 @@ class Player:
         return 'rock'
 
     def learn(self, my_move, their_move):
-        self.last_opponent_move = their_move
-        self.my_move = my_move
+        pass
 
 
 def beats(one, two):
@@ -56,11 +55,18 @@ class ReflectPlayer(Player):
     """This allows opponent to play your previous move as their next move
     (If you play rock in your last move, the opponent would play rock in their next move)"""
 
+    def __init__(self):
+        super().__init__()
+        self.their_move = None
+
     def move(self):
         if self.last_opponent_move is not None:
             return self.last_opponent_move
         else:
             return random.choice(MOVES)
+
+    def learn(self, my_move, their_move):
+        self.their_move = their_move
 
 
 class CyclePlayer(Player):
@@ -76,11 +82,14 @@ class CyclePlayer(Player):
             self.index += 1
         return new_move
 
+    def learn(self, my_move, their_move):
+        self.my_move = my_move
+
 
 class Game:
-    def __init__(self, p1, p2, rounds=4):  # Change value of rounds to determine number of game rounds
-        self.p1 = p1
-        self.p2 = p2
+    def __init__(self, player1, player2, rounds=4):  # Change value of rounds to determine number of game rounds
+        self.p1 = player1
+        self.p2 = player2
         self.rounds = rounds
 
     def play_round(self):
@@ -115,7 +124,13 @@ class Game:
 
 
 if __name__ == '__main__':
-    opponent = CyclePlayer()  # Switch opponent from ReflectivePlayer() and CyclePlayer() or RandomPlayer() or
-    # RockPlayer()
-    game = Game(HumanPlayer(), opponent)
+    opponents = [
+        RockPlayer(),
+        RandomPlayer(),
+        ReflectPlayer(),
+        CyclePlayer()
+    ]
+    p1 = HumanPlayer()
+    p2 = random.choice(opponents)
+    game = Game(p1, p2)
     game.play_game()
